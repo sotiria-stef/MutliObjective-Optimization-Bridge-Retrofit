@@ -149,12 +149,15 @@ def JacketBounds(d_init):
     ub = [ubx1, ubx2, ubx3]
     return lb, ub
 
-
+## Jacket parameters
 def JacketObj():
     intVars = [1, 2, 3]
     nvars = 3
+    
+ ## Constraints
     goal = 1.1
     goal2 = 1.05
+    
     # fc of core concrete
     fc_init = 24
     # fc of jacket concrete
@@ -174,9 +177,13 @@ def JacketObj():
     rhow_init = 0.0075
     Alunit_jack = math.pi * (dl_jack ** 2) / 4
     Asunit_jack = math.pi * (ds_jack ** 2) / 4
+    
+    #Cost and CO2 emissionfunctions 
     cost = [1500, 1100, 1100]
     co2 = [0.12, 0.684, 5]
 
+    
+    #Performance functions
     beta0 = [0.566, 1.167, 0.802, 1.094, -4.213]
     beta1 = [0.059, -0.353, -0.212, -0.274, 4.610]
     beta2 = [0.129, 0.012, -0.013, 0.003, 0.296]
