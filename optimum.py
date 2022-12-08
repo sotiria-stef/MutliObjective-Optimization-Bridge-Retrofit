@@ -149,16 +149,14 @@ def JacketBounds(d_init):
     ub = [ubx1, ubx2, ubx3]
     return lb, ub
 
-## Jacket parameters
+
 def JacketObj():
     intVars = [1, 2, 3]
     nvars = 3
-    
- ## Constraints
     goal = 1.1
     goal2 = 1.05
-    
     # fc of core concrete
+    ######################################################
     fc_init = 24
     # fc of jacket concrete
     fc_jack = 38
@@ -175,15 +173,16 @@ def JacketObj():
     lb, ub = JacketBounds(d_init)
     rhol_init = 0.008
     rhow_init = 0.0075
+      ######################################################
+
     Alunit_jack = math.pi * (dl_jack ** 2) / 4
     Asunit_jack = math.pi * (ds_jack ** 2) / 4
-    
-    #Cost and CO2 emissionfunctions 
+
+      ######################################################
     cost = [1500, 1100, 1100]
     co2 = [0.12, 0.684, 5]
+      ######################################################
 
-    
-    #Performance functions
     beta0 = [0.566, 1.167, 0.802, 1.094, -4.213]
     beta1 = [0.059, -0.353, -0.212, -0.274, 4.610]
     beta2 = [0.129, 0.012, -0.013, 0.003, 0.296]
@@ -225,6 +224,7 @@ def JacketObj():
         #                          0.025 * x[2] * (d_init - 0.05 + 0.02 * x[0]))) / rhow_init),
         lambda x: (co2[0] * 3.14159 / 4 * ((d_init + 2 * 0.02 * x[0]) * (d_init - 2 * 0.02 * x[0])) * 2500 + co2[
             1] * Alunit_jack * x[1] * 7850) / 1000]
+
     constraint = lambda x: -(beta0[4] + beta4[4] * fc_jack / fc_init + beta5[4] * fy_jack / fy_core + beta1[4] * (
             d_init + 0.02 * 2 * x[0]) / d_init + beta2[4] * (Alunit_jack * x[1] / (1.1025 * d_init ** 2)) / rhol_init +
                              beta3[4] * (4 * Asunit_jack / (
@@ -236,7 +236,7 @@ def JacketObj():
 
     method = get_algorithm('nsga2', pop_size=1000)
     res = minimize(problem, method, save_history=False)
-    bwm = best_value(res.X, res.F)
+    bwm = best_value(res.X, res.F, 'Jacket')
     m = min(bwm)
     print(m)
     plot = Scatter()
@@ -256,14 +256,88 @@ def JacketObj():
 
     utilities.create_population_video()
 
+def FRPdefBounds():
+    lbx1 = 0
+    ubx1 = 1
+    lbx2 = 1
+    ubx2 = 10
+    lb   = [lbx1,lbx2]
+    ub   = [ubx1,ubx2]
+    return lb, ub
 
-def best_value(x, obj):
-    w = [0.45, 0.045, 0.23, 0.17, 0.1]
+def FRPdefObj():
+    intVars=[1,2]
+    nvars=2
+    lb,ub = FRPdefBounds()
+    ######################################################
+    fc_init = 24
+    Ecore = 29
+    d_init = 1.6
+    t_frp=[0.169/1000, 0.333/1000]
+    Efrp=[210, 225]
+    fjfrp=[3000, 3500]
+    rhow_init =0.0075
+    cost=[400, 600]
+    co2= [0.12,0.684,5]
+    ######################################################
+    goal=1.10
+    goal2=0.0
+    beta0 = [-1.27e+02,-7.610,9.02e+01,7.56e+01,-0.494]
+    beta1 = [+1.28e+02,8.580,-8.96e+01,-7.49e+01,1.45]
+    beta2 = [-9.14e-03,2.67e-03,-1.07e-01,-7.61e-02,-0.00178]
+    beta3 = [4.06e-03,4.49e-04,1.40e-02,1.11e-02,0.000802]
+    beta4 = [4.89e-02,2.91e-02,4.71e-01,4.02e-01,0.0310]
+    obj = [
+        lambda x: (cost[0]*d_init*math.pi*1.1*x[1]*(1-x[0])+cost[1]*d_init*math.pi*1.1*x[0]*(x[1]))/1000,
+        lambda x: -(beta0[1] + beta1[1]*(d_init+2*(x[1]*t_frp[1]*(1-x[0])+(x[1])*t_frp[0]*x[0]))/d_init + beta2[1]*(x[0]*Efrp[1]+(1-x[0])*Efrp[0])/Ecore +beta3[1]*(x[0]*fjfrp[1]+(1-x[0])*fjfrp[0])/fc_init +beta4[1]*(4*(x[1]*t_frp[1]*(1-x[0])+(x[1])*t_frp[0]*x[0])/d_init)/rhow_init),
+        lambda x: -(beta0[2] + beta1[2]*(d_init+2*(x[1]*t_frp[1]*(1-x[0])+(x[1])*t_frp[0]*x[0]))/d_init + beta2[1]*(x[0]*Efrp[1]+(1-x[0])*Efrp[0])/Ecore +beta3[1]*(x[0]*fjfrp[1]+(1-x[0])*fjfrp[0])/fc_init +beta4[1]*(4*(x[1]*t_frp[1]*(1-x[0])+(x[1])*t_frp[0]*x[0])/d_init)/rhow_init),
+        lambda x: (co2[2]*(3.14159*(d_init)*1.1*x[1]*(1-x[0])+2*3.14159*(d_init)*1.1*x[1]*(x[0])))*0.304/0.25/1000]
+    constraint = lambda x: -((beta0[3] + beta1[3]*(d_init+2*(x[1]*t_frp[1]*(1-x[0])+(x[1])*t_frp[0]*x[0]))/d_init + beta2[3]*(x[0]*Efrp[1]+(1-x[0])*Efrp[3])/Ecore +beta3[3]*(x[0]*fjfrp[1]+(1-x[0])*fjfrp[0])/fc_init +beta4[3]*(4*(x[1]*t_frp[1]*(1-x[0])+(x[1])*t_frp[0]*x[0])/d_init)/rhow_init))+goal
+    if callable(constraint):
+        constraint = [constraint]
+    problem = FunctionalProblem(3, obj, constr_ieq=constraint, xl=lb, xu=ub)
+
+    method = get_algorithm('nsga2', pop_size=1000)
+    res = minimize(problem, method, save_history=False)
+    bwm = best_value(res.X, res.F, 'FRP')
+    m = min(bwm)
+    print(m)
+    plot = Scatter()
+    plot.add(res.F)
+    plot.show()
+    # Check if PetalPics folder exists
+    petalpics_dir = os.path.join(PROJECT_DIR, 'PetalPics')
+    if os.path.exists(petalpics_dir):
+        shutil.rmtree(petalpics_dir)
+        os.mkdir(petalpics_dir)
+    else:
+        os.mkdir(petalpics_dir)
+    for i in range(len(res.F)):
+        plot_petal = Petal(bounds=[-2, 2])
+        plot_petal.add(res.F[i])
+        plot_petal.save(f'PetalPics/petal_population_{i}.png')
+
+    utilities.create_population_video()
+
+def best_value(x, obj, type):
+    if type == 'FRP':
+        ######################################################
+        w=[0.56, 0.052, 0.164, 0.2196]
+        ######################################################
+    elif type == 'Jacket':
+        ######################################################
+        w = [0.45, 0.045, 0.23, 0.17, 0.1]
+        ######################################################
     bwm = np.zeros(len(x))
     for i in range(len(bwm)):
         bwm[i] = sum(x * y for x, y in zip(w, obj[i]))
     return bwm
 
 
+
 if __name__ == '__main__':
-    JacketObj()
+    run_scenario = '' #Choose Between 'FRP' or 'RCJacket'
+    if run_scenario == 'RCJacket':
+        JacketObj()
+    elif run_scenario == 'FRP':
+        FRPdefObj()
