@@ -47,7 +47,8 @@ class RCJacketInput():
     cost = [1500, 1100, 1100]
     co2 = [0.12, 0.684, 5]
     # Weights from BWM
-    w = [0.45, 0.045, 0.23, 0.17, 0.1]
+     w=[0.56, 0.052, 0.164, 0.2196]
+
 
 class FRPInput():
     ## Core Properties
